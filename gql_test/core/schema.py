@@ -78,6 +78,9 @@ class CreateCategory(graphene.Mutation):
         category.save()
         return CreateCategory(category=category)
 
+class UpdateCategory(graphene.Mutation):
+    
+
 
 class Mutation(graphene.ObjectType):
     update_category = CreateCategory.Field()
