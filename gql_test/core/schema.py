@@ -15,35 +15,35 @@ class IngredientType(DjangoObjectType):
     class Meta:
         model = Ingredient
         fields = ('id', 'name', 'notes', 'category')
+        
+# class Ship(graphene.ObjectType):
+#     class Meta:
+#         interfaces = (relay.Node, )
 
-class Ship(graphene.ObjectType):
-    class Meta:
-        interfaces = (relay.Node, )
+#     name = graphene.String(description='The name of the ship')
 
-    name = graphene.String(description='The name of the ship')
+#     @classmethod
+#     def get_node(cls, info, id):
+#         return get_ship(id)
 
-    @classmethod
-    def get_node(cls, info, id):
-        return get_ship(id)
+#     @staticmethod
+#     def to_global_id(type_, id):
+#         # to_global_id will define how a node id is encoded
+#         return f'{type_}:{id}'
 
-    @staticmethod
-    def to_global_id(type_, id):
-        # to_global_id will define how a node id is encoded
-        return f'{type_}:{id}'
+#     @staticmethod
+#     def get_node_from_global_id(info, global_id, only_type=None):
+#         # get_node_from_global_id how to retriee a Node given a encoded id
+#         type_, id = global_id.split(':')
+#         if only_type:
+#             # we assure that the node type that we want to retrieve
+#             # is the same that was indicated in the field type
+#             assert type_ == only_type._meta.name, 'Received not compatible node.'
 
-    @staticmethod
-    def get_node_from_global_id(info, global_id, only_type=None):
-        # get_node_from_global_id how to retriee a Node given a encoded id
-        type_, id = global_id.split(':')
-        if only_type:
-            # we assure that the node type that we want to retrieve
-            # is the same that was indicated in the field type
-            assert type_ == only_type._meta.name, 'Received not compatible node.'
-
-        if type_ == 'User':
-            return get_user(id)
-        elif type_ == 'Photo':
-            return get_photo(id)
+#         if type_ == 'User':
+#             return get_user(id)
+#         elif type_ == 'Photo':
+#             return get_photo(id)
 
 # Root type while all access begins
 class Query(graphene.ObjectType):
@@ -64,5 +64,23 @@ class Query(graphene.ObjectType):
         except Category.DoesNotExist:
             return None
 
-schema = graphene.Schema(query=Query)
+
+class CreateCategory(graphene.Mutation):
+
+    class Arguments:
+        name = graphene.String(required=True)
+
+    category = graphene.Field(CategoryType)
+
+    @classmethod
+    def mutate(cls, root, info, name):
+        category = Category(name=name)
+        category.save()
+        return CreateCategory(category=category)
+
+
+class Mutation(graphene.ObjectType):
+    update_category = CreateCategory.Field()
+
+schema = graphene.Schema(query=Query, mutation=Mutation)
 
