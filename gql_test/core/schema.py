@@ -79,11 +79,37 @@ class CreateCategory(graphene.Mutation):
         return CreateCategory(category=category)
 
 class UpdateCategory(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+        name = graphene.String(required=True)
     
+    category = graphene.Field(CategoryType)
+
+    @classmethod
+    def mutate(cls, root, info, id, name):
+        category = Category.objects.get(id=id)
+        category.name = name
+        category.save()
+
+        return UpdateCategory(category=category)
+
+class DeleteCategory(graphene.Mutation):
+    class Arguments:
+        id = graphene.ID()
+
+    category = graphene.Field(CategoryType)
+
+    @classmethod
+    def mutate(cls, root, info, id):
+        category = Category.objects.get(id=id)
+        category.delete()
+        return 
 
 
 class Mutation(graphene.ObjectType):
-    update_category = CreateCategory.Field()
+    create_category = CreateCategory.Field()
+    update_category = UpdateCategory.Field()
+    delete_category = DeleteCategory.Field()
 
 schema = graphene.Schema(query=Query, mutation=Mutation)
 
