@@ -52,7 +52,7 @@ class Query(graphene.ObjectType):
 
     # Should be CustomNode.Field() if we want to use our ccustom Node
     
-    node = relay.Node.Field()
+    node = relay.Node.Field
 
     def resolve_all_ingredients(root, info):
         # we can easily optimize query count in the resolve method
